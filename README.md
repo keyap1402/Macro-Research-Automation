@@ -1,3 +1,4 @@
+> Live demo output: [demo_report.html](./demo_report.html)
 # Automated Macro Research Aggregator
 A Python tool that aggregates macro research from 9 sources simultaneously, filters by relevance, and uses the Claude API to summarize each result into 2-sentence analyst-style digests. Outputs a clean, filterable HTML report.
 
