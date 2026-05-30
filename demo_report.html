@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>MacroIntel — Research Digest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Literata:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0B0C10;--surface:#13151C;--border:#1E2130;
+      --text:#E8EAF0;--muted:#5A6070;--accent:#00C896;
+      --font-head:'Syne',sans-serif;
+      --font-mono:'IBM Plex Mono',monospace;
+      --font-body:'Literata',serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;padding-bottom:80px}
+
+    header{border-bottom:1px solid var(--border);padding:40px 60px 32px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+    .header-left h1{font-family:var(--font-head);font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-0.03em;line-height:1}
+    .header-left h1 span{color:var(--accent)}
+    .header-sub{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:0.08em;text-transform:uppercase}
+    .run-time{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:0.05em;text-align:right}
+    .total-badge{display:inline-block;margin-top:8px;background:var(--accent)18;border:1px solid #00C89640;color:var(--accent);font-family:var(--font-mono);font-size:12px;padding:4px 12px;border-radius:2px}
+
+    .keyword-strip{padding:16px 60px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .kw-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-right:4px}
+    .kw-tag{font-family:var(--font-mono);font-size:10px;padding:3px 9px;border:1px solid var(--border);color:var(--muted);border-radius:2px;letter-spacing:0.05em}
+
+    .filters{padding:24px 60px 0;display:flex;gap:8px;flex-wrap:wrap}
+    .filter-btn{font-family:var(--font-mono);font-size:11px;padding:6px 14px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;letter-spacing:0.04em}
+    .filter-btn:hover{border-color:var(--sig-color,var(--accent));color:var(--sig-color,var(--accent))}
+    .filter-btn.active{background:var(--accent)18;border-color:var(--accent);color:var(--accent)}
+    .filter-btn .count{opacity:.6;margin-left:4px}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:1px;margin-top:24px;border-top:1px solid var(--border);border-left:1px solid var(--border)}
+    .card{background:var(--surface);border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:28px 32px;display:flex;flex-direction:column;gap:14px;transition:background .15s}
+    .card:hover{background:#161820}
+    .card.hidden{display:none}
+    .card-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .badge{font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border-radius:2px;border:1px solid;font-weight:500}
+    .source-tag{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:0.05em}
+    .pub-date{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-left:auto}
+    .card-title{font-family:var(--font-head);font-size:15px;font-weight:600;line-height:1.4;letter-spacing:-0.01em}
+    .card-title a{color:var(--text);text-decoration:none;transition:color .15s}
+    .card-title a:hover{color:var(--accent)}
+    .card-summary{font-size:13.5px;line-height:1.65;color:#9AA0B0;font-style:italic;flex:1}
+    .read-link{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:0.05em;transition:color .15s;align-self:flex-start}
+    .read-link:hover{color:var(--accent)}
+
+    .demo-banner{margin:16px 60px 0;padding:10px 16px;background:#FFD16610;border:1px solid #FFD16640;border-radius:2px;font-family:var(--font-mono);font-size:10px;color:#FFD166;letter-spacing:0.05em}
+
+    footer{margin-top:60px;padding:24px 60px 0;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    footer p{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:0.05em}
+    footer a{color:var(--accent);text-decoration:none}
+
+    @media(max-width:700px){
+      header,.keyword-strip,.filters,.demo-banner{padding-left:20px;padding-right:20px}
+      footer{padding-left:20px;padding-right:20px}
+      .grid{border-left:none}
+      .card{border-right:none;padding:20px}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Macro<span>Intel</span></h1>
+    <p class="header-sub">Automated Research Aggregator · AI-Summarized · Live Feed</p>
+  </div>
+  <div class="header-right">
+    <p class="run-time">Generated Friday, May 29 2026 — 02:37</p>
+    <span class="total-badge">12 results</span>
+  </div>
+</header>
+
+<div class="keyword-strip">
+  <span class="kw-label">Tracking</span>
+  <span class="kw-tag">inflation</span><span class="kw-tag">monetary policy</span><span class="kw-tag">interest rates</span><span class="kw-tag">federal reserve</span><span class="kw-tag">GDP</span><span class="kw-tag">recession</span><span class="kw-tag">credit markets</span><span class="kw-tag">emerging markets</span><span class="kw-tag">fiscal policy</span><span class="kw-tag">yield curve</span><span class="kw-tag">central bank</span><span class="kw-tag">debt</span>
+</div>
+
+<div class="demo-banner">
+  ⚠ DEMO MODE — Live run fetches real-time results from NBER · Fed · IMF · World Bank · arXiv · SSRN · Reuters · FT · WSJ
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" data-filter="all">All <span class="count">12</span></button><button class="filter-btn" data-filter="Academic Research" style="--sig-color:#7B6BFF;">Academic Research <span class="count">4</span></button><button class="filter-btn" data-filter="Policy Signal" style="--sig-color:#FF6B35;">Policy Signal <span class="count">4</span></button><button class="filter-btn" data-filter="New Data" style="--sig-color:#00C896;">New Data <span class="count">3</span></button><button class="filter-btn" data-filter="Market Commentary" style="--sig-color:#FFD166;">Market Commentary <span class="count">1</span></button>
+</div>
+
+<div class="grid" id="grid">
+  
+        <article class="card" data-signal="Academic Research">
+          <div class="card-meta">
+            <span class="badge" style="background:#7B6BFF20;color:#7B6BFF;border-color:#7B6BFF40">Academic Research</span>
+            <span class="source-tag">NBER</span>
+            <span class="pub-date">2026-05-21</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://www.nber.org/papers/w32145" target="_blank" rel="noopener">Inflation Persistence and the Role of Supply Chain Normalization</a>
+          </h3>
+          <p class="card-summary">This paper finds that roughly 40% of post-pandemic inflation persistence is attributable to supply chain disruption rather than demand-side pressure, with normalization lags varying significantly across sectors. The implication for policymakers is that rate hikes alone may overshoot if supply-side recovery continues on its current trajectory.</p>
+          <a href="https://www.nber.org/papers/w32145" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+        <article class="card" data-signal="Policy Signal">
+          <div class="card-meta">
+            <span class="badge" style="background:#FF6B3520;color:#FF6B35;border-color:#FF6B3540">Policy Signal</span>
+            <span class="source-tag">Federal Reserve</span>
+            <span class="pub-date">2026-05-22</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://www.federalreserve.gov/monetarypolicy/fomcminutes20260501.htm" target="_blank" rel="noopener">FOMC Minutes: May 2026 — Committee Signals Prolonged Pause</a>
+          </h3>
+          <p class="card-summary">The May FOMC minutes reveal broad consensus among committee members to hold rates at current levels through at least Q3 2026, citing mixed signals on labour market softening and still-elevated core PCE. Dissenting views centred on growing risks of overtightening given deteriorating small business credit conditions.</p>
+          <a href="https://www.federalreserve.gov/monetarypolicy/fomcminutes20260501.htm" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+        <article class="card" data-signal="New Data">
+          <div class="card-meta">
+            <span class="badge" style="background:#00C89620;color:#00C896;border-color:#00C89640">New Data</span>
+            <span class="source-tag">IMF</span>
+            <span class="pub-date">2026-05-20</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://www.imf.org/en/Publications/WEO" target="_blank" rel="noopener">World Economic Outlook Update: Diverging Growth Paths in 2026</a>
+          </h3>
+          <p class="card-summary">The IMF revised global growth down 0.2pp to 2.9% for 2026, driven primarily by weaker-than-expected momentum in the euro area and continued property sector drag in China. Emerging markets ex-China are now the only major grouping with upward revision, led by India and Southeast Asia.</p>
+          <a href="https://www.imf.org/en/Publications/WEO" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+        <article class="card" data-signal="Academic Research">
+          <div class="card-meta">
+            <span class="badge" style="background:#7B6BFF20;color:#7B6BFF;border-color:#7B6BFF40">Academic Research</span>
+            <span class="source-tag">arXiv Econ</span>
+            <span class="pub-date">2026-05-19</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://arxiv.org/abs/2605.11234" target="_blank" rel="noopener">Yield Curve Inversion Duration and Recession Probability: A Bayesian Reassessment</a>
+          </h3>
+          <p class="card-summary">Using a Bayesian VAR framework across 14 advanced economies since 1970, this paper finds that inversion duration above 12 months raises 18-month recession probability to 73%, significantly higher than prior estimates. Critically, the relationship weakens substantially when inversions are driven by term premium compression rather than expectations of rate cuts.</p>
+          <a href="https://arxiv.org/abs/2605.11234" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+        <article class="card" data-signal="New Data">
+          <div class="card-meta">
+            <span class="badge" style="background:#00C89620;color:#00C896;border-color:#00C89640">New Data</span>
+            <span class="source-tag">World Bank</span>
+            <span class="pub-date">2026-05-18</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://www.worldbank.org/en/research" target="_blank" rel="noopener">Emerging Market Debt Sustainability Under Higher-for-Longer Rates</a>
+          </h3>
+          <p class="card-summary">The World Bank flags 23 emerging economies facing acute refinancing risk as $340bn in external sovereign debt matures between 2026–2028 into a structurally higher rate environment. Countries with commodity export concentration and dollar-denominated debt face the sharpest stress, with Ghana, Ecuador, and Pakistan identified as highest near-term risk.</p>
+          <a href="https://www.worldbank.org/en/research" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+        <article class="card" data-signal="Academic Research">
+          <div class="card-meta">
+            <span class="badge" style="background:#7B6BFF20;color:#7B6BFF;border-color:#7B6BFF40">Academic Research</span>
+            <span class="source-tag">SSRN Finance</span>
+            <span class="pub-date">2026-05-17</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4812356" target="_blank" rel="noopener">Credit Spread Dynamics and the Bank Lending Channel: Evidence from 2024–2025</a>
+          </h3>
+          <p class="card-summary">Examining bank-level data across G10 economies, this paper documents a significant tightening in lending standards that lagged the Fed hiking cycle by 8–10 months and has only partially reversed despite the pause. The findings suggest credit market transmission of monetary policy remains meaningfully contractionary even as official rates stabilise.</p>
+          <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4812356" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+        <article class="card" data-signal="Policy Signal">
+          <div class="card-meta">
+            <span class="badge" style="background:#FF6B3520;color:#FF6B35;border-color:#FF6B3540">Policy Signal</span>
+            <span class="source-tag">Reuters Markets</span>
+            <span class="pub-date">2026-05-23</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://www.reuters.com/markets/rates-bonds/" target="_blank" rel="noopener">Fed's Waller: Rate Cuts Unlikely Before Labour Market Shows 'Convincing' Softening</a>
+          </h3>
+          <p class="card-summary">Fed Governor Waller pushed back against market pricing for two 2026 cuts, stating the committee needs to see several consecutive months of rising unemployment and slowing wage growth before easing. His comments triggered a 12bp repricing in December Fed funds futures.</p>
+          <a href="https://www.reuters.com/markets/rates-bonds/" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+        <article class="card" data-signal="Market Commentary">
+          <div class="card-meta">
+            <span class="badge" style="background:#FFD16620;color:#FFD166;border-color:#FFD16640">Market Commentary</span>
+            <span class="source-tag">FT Economics</span>
+            <span class="pub-date">2026-05-24</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://www.ft.com/economics" target="_blank" rel="noopener">Fiscal Dominance Risk Returns to the Agenda as US Deficit Widens</a>
+          </h3>
+          <p class="card-summary">The US fiscal deficit is tracking 6.2% of GDP for FY2026, raising renewed debate among economists about the risk of fiscal dominance — where debt dynamics constrain monetary policy independence. Bond market participants are increasingly pricing a term premium for duration risk not seen since 2007.</p>
+          <a href="https://www.ft.com/economics" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+        <article class="card" data-signal="Academic Research">
+          <div class="card-meta">
+            <span class="badge" style="background:#7B6BFF20;color:#7B6BFF;border-color:#7B6BFF40">Academic Research</span>
+            <span class="source-tag">NBER</span>
+            <span class="pub-date">2026-05-16</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://www.nber.org/papers/w32189" target="_blank" rel="noopener">Monetary Policy Transmission in Fragmented Banking Systems</a>
+          </h3>
+          <p class="card-summary">This paper finds that rate transmission to deposit costs is 30–45% weaker in banking systems with high concentration among large institutions relative to fragmented systems dominated by community banks. The result has direct implications for the Fed's ability to cool inflation via the savings channel in the current US banking landscape.</p>
+          <a href="https://www.nber.org/papers/w32189" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+        <article class="card" data-signal="Policy Signal">
+          <div class="card-meta">
+            <span class="badge" style="background:#FF6B3520;color:#FF6B35;border-color:#FF6B3540">Policy Signal</span>
+            <span class="source-tag">IMF</span>
+            <span class="pub-date">2026-05-15</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://www.imf.org/en/Publications/WP" target="_blank" rel="noopener">Central Bank Digital Currencies and Monetary Policy Transmission: New Evidence</a>
+          </h3>
+          <p class="card-summary">An IMF working paper using cross-country simulation finds that retail CBDC adoption above 15% of M1 meaningfully strengthens monetary policy transmission by reducing bank intermediation frictions. However, it also raises financial stability risks during stress periods if CBDC becomes a flight-to-safety instrument.</p>
+          <a href="https://www.imf.org/en/Publications/WP" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+        <article class="card" data-signal="New Data">
+          <div class="card-meta">
+            <span class="badge" style="background:#00C89620;color:#00C896;border-color:#00C89640">New Data</span>
+            <span class="source-tag">WSJ Economy</span>
+            <span class="pub-date">2026-05-25</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://www.wsj.com/economy" target="_blank" rel="noopener">US GDP Revised Down to 1.2% in Q1 2026 on Weak Business Investment</a>
+          </h3>
+          <p class="card-summary">The BEA's second estimate revised Q1 2026 GDP growth down 0.4pp to 1.2% annualised, with the drag concentrated in equipment investment and commercial construction. Consumer spending held up at 2.1% but showed signs of rotation from goods to services consistent with cooling durable demand.</p>
+          <a href="https://www.wsj.com/economy" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+        <article class="card" data-signal="Policy Signal">
+          <div class="card-meta">
+            <span class="badge" style="background:#FF6B3520;color:#FF6B35;border-color:#FF6B3540">Policy Signal</span>
+            <span class="source-tag">Federal Reserve</span>
+            <span class="pub-date">2026-05-14</span>
+          </div>
+          <h3 class="card-title">
+            <a href="https://www.federalreserve.gov/monetarypolicy/beigebook/" target="_blank" rel="noopener">Beige Book — May 2026: Activity 'Modest to Moderate' Across Most Districts</a>
+          </h3>
+          <p class="card-summary">The May Beige Book describes economic activity as modest to moderate across 9 of 12 Fed districts, with manufacturing the key soft spot and services still holding. Labour markets described as 'gradually loosening' with reports of longer hiring timelines and reduced voluntary quits in professional services.</p>
+          <a href="https://www.federalreserve.gov/monetarypolicy/beigebook/" target="_blank" class="read-link" rel="noopener">Read source ↗</a>
+        </article>
+</div>
+
+<footer>
+  <p>Sources: NBER · Federal Reserve · IMF · World Bank · arXiv Econ · SSRN · Reuters · FT · WSJ</p>
+  <p>Built with Python · feedparser · BeautifulSoup · <a href="https://anthropic.com" target="_blank">Claude API</a></p>
+</footer>
+
+<script>
+  const btns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.card');
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      cards.forEach(c => {
+        c.classList.toggle('hidden', f !== 'all' && c.dataset.signal !== f);
+      });
+    });
+  });
+</script>
+</body>
+</html>
